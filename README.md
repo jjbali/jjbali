@@ -1,4 +1,4 @@
-- 👋 Hi, I’m @jjbali
+- 👋 Hi, I’m @jjbali this is a test account.
 
 <!---
 jjbali/jjbali is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
