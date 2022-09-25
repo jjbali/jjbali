@@ -1,3 +1,4 @@
+## A sample chart
 ```mermaid
 flowchart LR
   subgraph TOP
@@ -13,4 +14,14 @@ flowchart LR
   end
   A --> TOP --> B
   B1 --> B2
+```
+
+## My chart
+```mermaid
+flowchart LR
+  subgraph A1
+    A --> B
+  direction LR
+  end
+A1 --> END
 ```
