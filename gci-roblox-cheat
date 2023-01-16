@@ -1,0 +1,176 @@
+local Data = require(game:GetService("ReplicatedStorage").Data)
+getgenv().ToggleAntiAfk = false
+
+-----------------------------------------------------------------------------------------------------------------------
+--AntiAfk
+local ChangeHistoryService = game:GetService("ChangeHistoryService")
+local VU = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+    if ToggleAntiAfk == true then
+        VU:CaptureController()
+        VU:ClickButton2(Vector2.new())
+    end
+end)
+
+-----------------------------------------------------------------------------------------------------------------------
+--Ui Lib
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/GreyCaat/GC-Library/main/Lib.txt", true))()
+
+
+local main = library:CreateMain("Grass Cutting Incremental", "also me hello")
+
+
+local AutoStuff = main:CreateTab("Auto-Stuff")
+
+local UpgradeStuff = main:CreateTab("Upgrade-Stuff")
+
+local misc = main:CreateTab("Misc.")
+
+
+local GrassLoop;
+local FarmGrass = AutoStuff:CreateToggle("Collect Grass", function(state)
+    if state then
+        local mod = require(game:GetService("ReplicatedStorage").EarnGrass)
+
+        GrassLoop = game:GetService("RunService").Heartbeat:Connect(function()
+            task.wait()
+            for _, v in pairs(game:GetService("Workspace").GrassObjects:GetChildren()) do
+                if v.Identifier.Value ~= "magic" then
+                    mod.collect(v, false)
+                end
+            end
+        end)
+    else
+        if GrassLoop then
+            GrassLoop:Disconnect()
+        end
+    end
+end)
+
+
+local PrestigeState = false
+local AutoPrestige = AutoStuff:CreateToggle("Auto Prestige", function(state)
+    if state then
+        PrestigeState = true
+        while PrestigeState == true do
+            wait(3)
+            local modscript = require(game:GetService("ReplicatedStorage").Resets)
+            modscript.Prestige()
+        end
+    else
+        PrestigeState = false
+    end
+end)
+
+
+local CrystallizeState = false
+local AutoCrystallize = AutoStuff:CreateToggle("Auto Crystallize", function(state)
+    if state then
+        CrystallizeState = true
+        while CrystallizeState == true do
+            wait(3)
+            local modscript = require(game:GetService("ReplicatedStorage").Resets)
+            modscript.Crystallize()
+        end
+    else
+        CrystallizeState = false
+    end
+end)
+
+local textClick = UpgradeStuff:CreateLabel("Clicking on a Upgrade will max it out")
+
+local ClickUpgradeState = false
+local ClickMaxUpgrade = UpgradeStuff:CreateToggle("Click Max Upgrade", function(state)
+    if state then
+        ClickUpgradeState = true
+        local Player = game.Players.LocalPlayer
+        for _, v in pairs(Player.PlayerGui:GetDescendants()) do
+            if v.Name == "BasicUpgrade" then
+                local DownConnection;
+
+                local function disc()
+                    DownConnection:Disconnect()
+                end
+
+                
+                local oldCS 
+                local oldBC
+                local oldCC
+
+                DownConnection = v.MouseButton1Down:Connect(function()
+                    if v.Variables.CostScaling.Value ~= 0 then
+                        oldCS = v.Variables.CostScaling.Value
+                        oldBC = v.Variables.BaseCost.Value
+                        oldCC = v.Variables.Currency.Value
+
+                        v.Variables.CostScaling.Value = 0
+                        v.Variables.BaseCost.Value = 0
+                        v.Variables.Currency.Value = "grass"
+                    end
+                    
+                    task.wait(0.1)
+
+                    if ClickUpgradeState then
+                        Data.BuyMaxUpgrade()
+                    else
+                        disc()
+                    end
+
+                    local obj = v
+                    local done = false
+                    repeat
+                        obj = obj.Parent
+                        local obj2 = obj:FindFirstChild("Info")
+
+                        if obj2 then
+                            done = true
+                        end
+                    until done
+
+                    for _, v in pairs(getconnections(obj.Info.CloseButton.MouseButton1Click)) do
+                        v:Fire()
+                    end
+
+                    if oldCS then
+                        v.Variables.CostScaling.Value = oldCS
+                        v.Variables.BaseCost.Value = oldBC
+                        v.Variables.Currency.Value = oldCC
+                    end
+                end)
+            end
+        end
+    else
+        ClickUpgradeState = false
+    end
+end)
+
+local clickmaxupgradeline = UpgradeStuff:CreateLine()
+
+local FreeUpgrades = UpgradeStuff:CreateButton("Cheap Upgrades", function()
+    local Player = game.Players.LocalPlayer
+    for _, v in pairs(Player.PlayerGui:GetDescendants()) do
+        if v.Name == v.Name then
+            v.Variables.CostScaling.Value = 0
+            v.Variables.BaseCost.Value = 0
+        end
+    end
+end)
+
+local AntiAfk = misc:CreateToggle("Anti Afk", function(state)
+    if state then
+        ToggleAntiAfk = true
+    else
+        ToggleAntiAfk = false
+    end
+end)
+
+--//
+local Multipliers = require(game:GetService'ReplicatedStorage':WaitForChild'Multipliers') do
+   local calculateMulti = rawget(Multipliers, 'calculateMulti')
+   for Index, Value in next, getconstants(calculateMulti) do
+       if type(Value) == 'number' then
+           setconstant(calculateMulti, Index, 1.5) -- adjust the number ur game might crash from all of the unoptimized popups
+       end
+   end
+end
